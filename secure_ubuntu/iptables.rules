@@ -1,0 +1,66 @@
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:FW - [0:0]
+:LOGNDROP - [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# Send any incoming or forwarded packet through the FW chain
+-A INPUT -j FW
+-A FORWARD -j FW
+
+# Completely open the loopback interface
+-A FW -i lo -j ACCEPT
+
+# Allow ICMP packets
+-A FW -p icmp --icmp-type any -j ACCEPT
+
+# Allow all incoming packets related to a connection or outgoing request.
+-A FW -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Log iptables activity
+-A LOGNDROP -m limit --limit 5/min -j LOG --log-prefix "iptables denied: " --log-level 7
+-A LOGNDROP -j DROP
+
+# Block Spoofing IP Addresses
+-A INPUT -i eth0 -s 10.0.0.0/8 -j LOG --log-prefix "IP DROP SPOOF "
+-A INPUT -i eth0 -s 10.0.0.0/8 -j DROP
+-A INPUT -i eth0 -s 172.16.0.0/12 -j LOG --log-prefix "IP DROP SPOOF "
+-A INPUT -i eth0 -s 172.16.0.0/12 -j DROP
+-A INPUT -i eth0 -s 192.168.0.0/16 -j LOG --log-prefix "IP DROP SPOOF "
+-A INPUT -i eth0 -s 192.168.0.0/16 -j DROP
+-A INPUT -i eth0 -s 224.0.0.0/4 -j LOG --log-prefix "IP DROP MULTICAST "
+-A INPUT -i eth0 -s 224.0.0.0/4 -j DROP
+-A INPUT -i eth0 -s 240.0.0.0/5 -j LOG --log-prefix "IP DROP SPOOF "
+-A INPUT -i eth0 -s 240.0.0.0/5 -j DROP
+-A INPUT -i eth0 -d 127.0.0.0/8 -j LOG --log-prefix "IP DROP LOOPBACK "
+-A INPUT -i eth0 -d 127.0.0.0/8 -j DROP
+-A INPUT -i eth0 -s 169.254.0.0/16 -j LOG --log-prefix "IP DROP MULTICAST "
+-A INPUT -i eth0 -s 169.254.0.0/16 -j DROP
+-A INPUT -i eth0 -s 0.0.0.0/8 -j LOG --log-prefix "IP DROP "
+-A INPUT -i eth0 -s 0.0.0.0/8 -j DROP
+-A INPUT -i eth0 -s 240.0.0.0/4 -j LOG --log-prefix "IP DROP "
+-A INPUT -i eth0 -s 240.0.0.0/4 -j DROP
+-A INPUT -i eth0 -s 255.255.255.255/32 -j LOG --log-prefix "IP DROP "
+-A INPUT -i eth0 -s 255.255.255.255/32 -j DROP
+-A INPUT -i eth0 -s 168.254.0.0/16 -j LOG --log-prefix "IP DROP "
+-A INPUT -i eth0 -s 168.254.0.0/16 -j DROP
+-A INPUT -i eth0 -s 248.0.0.0/5 -j LOG --log-prefix "IP DROP "
+-A INPUT -i eth0 -s 248.0.0.0/5 -j DROP
+
+# Syn-Flood Protection
+-A INPUT -p tcp ! --syn -m state --state NEW -j LOGNDROP
+-A INPUT -f -j LOGNDROP
+-A INPUT -p tcp --tcp-flags ALL ALL -j LOGNDROP
+-A INPUT -p tcp --tcp-flags ALL NONE -j LOGNDROP
+
+# Allow SSH, but only allow 4 attempts a minute.
+-A FW -p tcp --dport 22 -i eth0 -m state --state NEW -m recent --set
+-A FW -p tcp --dport 22 -i eth0 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j LOGNDROP
+-A FW -p tcp --dport 22 -i eth0 -m state --state NEW -j ACCEPT
+
+# Log and drop all other traffic
+-A FW -j LOGNDROP
+
+COMMIT
+
