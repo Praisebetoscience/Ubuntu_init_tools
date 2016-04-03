@@ -56,7 +56,7 @@
 
 # Allow SSH, but only allow 4 attempts a minute.
 -A FW -p tcp --dport 22 -i eth0 -m state --state NEW -m recent --set
--A FW -p tcp --dport 22 -i eth0 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 -j LOGNDROP
+-A FW -p tcp --dport 22 -i eth0 -m state --state NEW -m recent --update --seconds 600 --hitcount 4 -j LOGNDROP
 -A FW -p tcp --dport 22 -i eth0 -m state --state NEW -j ACCEPT
 
 # Log and drop all other traffic
