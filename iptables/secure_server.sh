@@ -1,5 +1,20 @@
 #!/bin/bash
 
+# Function that edits or appends property and value to config file
+function change_prop() {
+        prop="$1"
+        val="$2"
+        file="$3"
+        has_prop=$(egrep "^$prop\b" "$file")
+        if [[ $has_prop != "" ]]; then
+                sed -i.tmp "s/^$prop\b.*$/${prop}${val}/im" "$file"
+                rm "$file.tmp"
+        else
+                echo "$prop$val" >> "$file"
+        fi
+}
+
+
 # locakdown ssh
 echo "Disabling root login in ssh"
 if [ ! -f /etc/ssh/sshd_config ]; then
@@ -7,16 +22,10 @@ if [ ! -f /etc/ssh/sshd_config ]; then
 	exit 1
 fi
 
-hasPermitRootLogin=$(egrep -e '^[# ]*PermitRootLogin (yes|no)' /etc/ssh/sshd_config) 
-if [[ $hasPermitRootLogin != "" ]]; then
-	sed 's/^[# ]*PermitRootLogin yes/PermitRootLogin no/im' /etc/ssh/sshd_config > /etc/ssh/sshd_config.tmp 
-	mv /etc/ssh/sshd_config.tmp /etc/ssh/sshd_config
-else
-	echo "PermitRootLogin no" >> /etc/ssh/sshd_config
-fi
-
+change_prop PermitRootLogin " no" /etc/ssh/sshd_config
 service ssh restart
 echo "done"
+
 
 # Config iptables
 echo "Configuring iptables..."
