@@ -4,8 +4,6 @@ apt-get update
 apt-get -y install python3.5
 apt-get -y install python3-pip
 apt-get -y install python-pip
-apt-get -y install python-virutalenv
-pip install --upgrade pip
-pip install --upgrade setuptools
-pip install --upgrade wheel
-pip install --upgrade virtualenv
+cp pip.conf /etc/
+pip3 install --upgrade pip setuptools
+apt-get install python3-venv
