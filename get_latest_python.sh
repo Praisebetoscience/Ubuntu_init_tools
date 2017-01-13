@@ -6,4 +6,4 @@ apt-get -y install python3-pip
 apt-get -y install python-pip
 cp pip.conf /etc/
 pip3 install --upgrade pip setuptools
-apt-get install python3-venv
+apt-get -y install python3-venv
