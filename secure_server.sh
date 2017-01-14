@@ -41,6 +41,10 @@ if [ ! -f /etc/ssh/sshd_config ]; then
 fi
 
 change_prop PermitRootLogin " no" /etc/ssh/sshd_config
+
+echo "Disabling password login to ssh..."
+change_prop PasswordAuthentication " no" /etc/ssh/sshd_config
+
 service ssh restart
 echo "done"
 
