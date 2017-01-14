@@ -73,10 +73,10 @@ if [ ! -d /etc/network ]; then
         exit 1
 fi
 
-mv ./iptables/iptablessave /etc/network/if-post-down.d/
-mv ./iptables/iptablesload /etc/network/if-pre-up.d/
-mv ./iptables/iptables.rules /etc/network/
-mv ./iptables/iptables.downrules /etc/network/
+cp ./iptables/iptablessave /etc/network/if-post-down.d/
+cp ./iptables/iptablesload /etc/network/if-pre-up.d/
+cp ./iptables/iptables.rules /etc/network/
+cp ./iptables/iptables.downrules /etc/network/
 chown root:root /etc/network/if-post-down.d/iptablessave
 chown root:root /etc/network/if-pre-up.d/iptablesload
 chown root:root /etc/network/iptables.rules
@@ -91,7 +91,7 @@ echo "Done."
 # setup rsyslog for iptables
 echo "configuring rsyslog for iptables..."
 if [[ $(service rsyslog status) == *'running'* ]]; then
-        mv ./iptables/10-iptables.conf /etc/rsyslog.d/
+        cp ./iptables/10-iptables.conf /etc/rsyslog.d/
         chown root:root /etc/rsyslog.d/10-iptables.conf
         chmod 644 /etc/rsyslog.d/10-iptables.conf
         service rsyslog restart
